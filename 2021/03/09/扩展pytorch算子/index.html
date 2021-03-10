@@ -1,37 +1,368 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
 
-{% block page_class %}page-post-detail{% endblock %}
+<link rel="stylesheet" href="/css/main.css">
 
 
-{% block content %}
 
-  <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
 
-    <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+<meta name="description" content="扩展pytorch：实现自定义算子（一）例： $NCReLU&#x3D;concat(ReLU(x),-ReLU(-x))$ 用途不仅在输出中将输入大于0的部分保留下来，也将小于0的部分一并保留，并且按照输出通道维度进行拼接。pytorch自带方法实现： 1torch.cat([F.relu(x), -F.relu(-x)], dim&#x3D;1)  要实现以上算子，需要实现setup.py和ncrelu.cpp两">
+<meta property="og:type" content="article">
+<meta property="og:title" content="扩展pytorch算子">
+<meta property="og:url" content="http://example.com/2021/03/09/%E6%89%A9%E5%B1%95pytorch%E7%AE%97%E5%AD%90/index.html">
+<meta property="og:site_name" content="Bluzy的小站">
+<meta property="og:description" content="扩展pytorch：实现自定义算子（一）例： $NCReLU&#x3D;concat(ReLU(x),-ReLU(-x))$ 用途不仅在输出中将输入大于0的部分保留下来，也将小于0的部分一并保留，并且按照输出通道维度进行拼接。pytorch自带方法实现： 1torch.cat([F.relu(x), -F.relu(-x)], dim&#x3D;1)  要实现以上算子，需要实现setup.py和ncrelu.cpp两">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-09T14:02:42.000Z">
+<meta property="article:modified_time" content="2021-03-09T14:03:28.727Z">
+<meta property="article:author" content="Bluzy">
+<meta property="article:tag" content="pytorch">
+<meta property="article:tag" content="算子开发">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/03/09/%E6%89%A9%E5%B1%95pytorch%E7%AE%97%E5%AD%90/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>扩展pytorch算子 | Bluzy的小站</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
     </div>
   </div>
 
-{% endblock %}
+  <div class="site-meta">
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Bluzy的小站</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%89%A9%E5%B1%95pytorch%EF%BC%9A%E5%AE%9E%E7%8E%B0%E8%87%AA%E5%AE%9A%E4%B9%89%E7%AE%97%E5%AD%90%EF%BC%88%E4%B8%80%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">扩展pytorch：实现自定义算子（一）</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Bluzy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/09/%E6%89%A9%E5%B1%95pytorch%E7%AE%97%E5%AD%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Bluzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Bluzy的小站">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          扩展pytorch算子
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-03-09 22:02:42 / 修改时间：22:03:28" itemprop="dateCreated datePublished" datetime="2021-03-09T22:02:42+08:00">2021-03-09</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="扩展pytorch：实现自定义算子（一）"><a href="#扩展pytorch：实现自定义算子（一）" class="headerlink" title="扩展pytorch：实现自定义算子（一）"></a>扩展pytorch：实现自定义算子（一）</h1><p>例：</p>
+<p>$NCReLU=concat(ReLU(x),-ReLU(-x))$</p>
+<p>用途不仅在输出中将输入大于0的部分保留下来，也将小于0的部分一并保留，并且按照输出通道维度进行拼接。pytorch自带方法实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">torch.cat([F.relu(x), -F.relu(-x)], dim=<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p>要实现以上算子，需要实现<em><strong>setup.py</strong></em>和<em><strong>ncrelu.cpp</strong></em>两个文件即可。</p>
+<ol>
+<li>setup.py</li>
+</ol>
+<p>利用python中提供的setuptools模块完成事先编译流程，将写有算子的C++文件编译成为一个动态链接库(Linux下是.so文件)，可以让python调用其中实现的函数功能。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup</span><br><span class="line"><span class="keyword">from</span> torch.utils <span class="keyword">import</span> cpp_extension</span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">    name=<span class="string">&#x27;ncrelu_cpp&#x27;</span>,				<span class="comment"># 编译后的链接库名称</span></span><br><span class="line">    ext_modules=[</span><br><span class="line">        cpp_extension.CppExtension(<span class="string">&#x27;ncrelu_cpp&#x27;</span>,[<span class="string">&#x27;ncrelu.cpp&#x27;</span>]						<span class="comment"># 待编译文件，及编译函数</span></span><br><span class="line">        )</span><br><span class="line">    ],</span><br><span class="line">    cmdclass=&#123;						<span class="comment"># 执行编译命令设置</span></span><br><span class="line">        <span class="string">&#x27;build_ext&#x27;</span>: cpp_extension.BuildExtension</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>这里，pytorch提供了一个封装cpp_extension，方便编译过程中所需要的设置选项以及所需包含的头文件位置路径设置等。</p>
+<ol start="2">
+<li>ncrelu.cpp</li>
+</ol>
+<p>用C++实现算子。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;torch/extension.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function">torch::Tensor <span class="title">ncrelu_forward</span><span class="params">(torch::Tensor input)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> pos = input.clamp_min(<span class="number">0</span>);	        <span class="comment">// 具体实现部分</span></span><br><span class="line">    <span class="keyword">auto</span> neg = input.clamp_max(<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> torch::cat(&#123;pos, neg&#125;, <span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) &#123;	<span class="comment">// 绑定部分</span></span><br><span class="line">    m.def(<span class="string">&quot;forward&quot;</span>, &amp;ncrelu_forward, <span class="string">&quot;NCReLU forward&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上代码包含三个部分：</p>
+<p><strong>头文件：</strong>包含了<code>torch/extension.h</code>头文件，是编写pytorch的C++扩展时必须包含的一个文件。基本上囊括了实现中所需要的所有依赖，包含了<strong>ATen</strong>，<strong>pybind11</strong>和二者之间的交互。其中，ATen是pytorch底层张量运算库，负责实现具体张量操作运算。pybind11是实现C++代码到python的绑定，可以在python中调用C++函数。</p>
+<p><strong>具体实现：</strong>函数返回类型和传递参数类型均是<code>torch::Tensor</code>类，这种对象不仅包含了数据，还附属了诸多运算操作。因此我们可以看到在下面实现方式类似于python中使用Pytorch张量运算操作一样，<strong>可以直接调用如截取操作clamp和拼接操作cat等</strong>，非常简洁易读且方便。</p>
+<p><strong>绑定部分：</strong>只需要在<code>m.def</code>中传入参数，分别是绑定到python的函数名称，需绑定的C++函数引用，以及一个简短的函数说明字符串，用来添加到python函数中的<code>__doc__</code>成员名称中。</p>
+<p>将以上两个文件放在同一文件夹下，然后进行编译。使用<code>python setup.py build_ext --inplace</code>命令，如果一切正常将会在文件夹下产生类似<code>ncrelu_cpp.cpython-35m-x86_64-linux-gnu.so</code>动态链接文件。然后我们可以启动python检测是否可以导入其中的函数</p>
+<p>由于我们是利用Pytorch中ATen张量库封装的高层操作，<strong>是一种与运行设备无关的代码抽象</strong>，因此上面所实现的函数可以<strong>直接应用于GPU上进行计算</strong>，只需要将输入迁移至GPU上即可。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/pytorch/" rel="tag"># pytorch</a>
+              <a href="/tags/%E7%AE%97%E5%AD%90%E5%BC%80%E5%8F%91/" rel="tag"># 算子开发</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/09/macOS%E9%85%8D%E7%BD%AEPX4%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" rel="prev" title="macOS配置PX4开发环境">
+                  <i class="fa fa-chevron-left"></i> macOS配置PX4开发环境
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Bluzy</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

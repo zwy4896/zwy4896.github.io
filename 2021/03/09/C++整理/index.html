@@ -1,37 +1,426 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
 
-{% block page_class %}page-post-detail{% endblock %}
+<link rel="stylesheet" href="/css/main.css">
 
 
-{% block content %}
 
-  <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
 
-    <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+<meta name="description" content="C++文件编译与执行的四个阶段 预处理：根据文件中的    预处理指令修改源文件内容 编译：编译成汇编代码 汇编：把汇编语言翻译成目标机器指令 链接：链接目标代码生成可执行程序  堆和栈的区别堆：  人为分配的内存块，需要手动delete，程序结束后由操作系统自动回收。 分配和释放需要使用new&#x2F;delete，造成内存空间的不连续，会有大量碎片 生长空间越向上，地址越大  栈：  存放函数的参数、">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++面试题整理">
+<meta property="og:url" content="http://example.com/2021/03/09/C++%E6%95%B4%E7%90%86/index.html">
+<meta property="og:site_name" content="Bluzy的小站">
+<meta property="og:description" content="C++文件编译与执行的四个阶段 预处理：根据文件中的    预处理指令修改源文件内容 编译：编译成汇编代码 汇编：把汇编语言翻译成目标机器指令 链接：链接目标代码生成可执行程序  堆和栈的区别堆：  人为分配的内存块，需要手动delete，程序结束后由操作系统自动回收。 分配和释放需要使用new&#x2F;delete，造成内存空间的不连续，会有大量碎片 生长空间越向上，地址越大  栈：  存放函数的参数、">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-09T12:30:27.000Z">
+<meta property="article:modified_time" content="2021-03-09T13:59:06.071Z">
+<meta property="article:author" content="Bluzy">
+<meta property="article:tag" content="C++">
+<meta property="article:tag" content="笔记整理">
+<meta property="article:tag" content="面试">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/03/09/C++%E6%95%B4%E7%90%86/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>C++面试题整理 | Bluzy的小站</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
     </div>
   </div>
 
-{% endblock %}
+  <div class="site-meta">
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Bluzy的小站</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#C-%E6%96%87%E4%BB%B6%E7%BC%96%E8%AF%91%E4%B8%8E%E6%89%A7%E8%A1%8C%E7%9A%84%E5%9B%9B%E4%B8%AA%E9%98%B6%E6%AE%B5"><span class="nav-number">1.</span> <span class="nav-text">C++文件编译与执行的四个阶段</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A0%86%E5%92%8C%E6%A0%88%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">2.</span> <span class="nav-text">堆和栈的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B7%B1%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B5%85%E6%8B%B7%E8%B4%9D"><span class="nav-number">3.</span> <span class="nav-text">深拷贝和浅拷贝</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%93%AA%E4%BA%9B%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0%E4%B8%8D%E8%83%BD%E8%A2%AB%E7%BB%A7%E6%89%BF"><span class="nav-number">4.</span> <span class="nav-text">哪些成员函数不能被继承</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E7%B1%BB%E7%9A%84%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%94%A8virtual%E8%99%9A%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0"><span class="nav-number">5.</span> <span class="nav-text">基类的析构函数为什么要用virtual虚析构函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%93%AA%E4%BA%9B%E5%87%BD%E6%95%B0%E4%B8%8D%E8%83%BD%E5%A3%B0%E6%98%8E%E6%88%90%E8%99%9A%E5%87%BD%E6%95%B0"><span class="nav-number">6.</span> <span class="nav-text">哪些函数不能声明成虚函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%96%B9%E5%BC%8F%E4%BB%A5%E5%8F%8A%E5%AE%83%E4%BB%AC%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">7.</span> <span class="nav-text">内存分配方式以及它们的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1%E6%96%B9%E5%BC%8F%E5%92%8C%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1%E6%96%B9%E5%BC%8F"><span class="nav-number">8.</span> <span class="nav-text">进程间通信方式和线程间通信方式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#STL%E5%BA%93%E7%9A%84%E5%AE%B9%E5%99%A8%E5%92%8C%E7%AE%97%E6%B3%95"><span class="nav-number">9.</span> <span class="nav-text">STL库的容器和算法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E5%92%8C%E6%8C%87%E9%92%88%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">10.</span> <span class="nav-text">数组和指针的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8C%87%E9%92%88%E5%92%8C%E5%BC%95%E7%94%A8%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">11.</span> <span class="nav-text">指针和引用的区别</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Bluzy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/09/C++%E6%95%B4%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Bluzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Bluzy的小站">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          C++面试题整理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-03-09 20:30:27 / 修改时间：21:59:06" itemprop="dateCreated datePublished" datetime="2021-03-09T20:30:27+08:00">2021-03-09</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="C-文件编译与执行的四个阶段"><a href="#C-文件编译与执行的四个阶段" class="headerlink" title="C++文件编译与执行的四个阶段"></a>C++文件编译与执行的四个阶段</h1><ol>
+<li>预处理：根据文件中的    预处理指令修改源文件内容</li>
+<li>编译：编译成汇编代码</li>
+<li>汇编：把汇编语言翻译成目标机器指令</li>
+<li>链接：链接目标代码生成可执行程序</li>
+</ol>
+<h1 id="堆和栈的区别"><a href="#堆和栈的区别" class="headerlink" title="堆和栈的区别"></a>堆和栈的区别</h1><p>堆：</p>
+<ul>
+<li>人为分配的内存块，需要手动delete，程序结束后由操作系统自动回收。</li>
+<li>分配和释放需要使用new/delete，造成内存空间的不连续，会有大量碎片</li>
+<li>生长空间越向上，地址越大</li>
+</ul>
+<p>栈：</p>
+<ul>
+<li>存放函数的参数、局部变量，由编译器自动分配释放。</li>
+<li>生长空间越向下，地址越小</li>
+</ul>
+<h1 id="深拷贝和浅拷贝"><a href="#深拷贝和浅拷贝" class="headerlink" title="深拷贝和浅拷贝"></a>深拷贝和浅拷贝</h1><p>如果一个类拥有资源，当这个类的对象发生复制过程的时候，如果资源重新分配了就是深拷贝；反之没有重新分配资源，就是浅拷贝。</p>
+<h1 id="哪些成员函数不能被继承"><a href="#哪些成员函数不能被继承" class="headerlink" title="哪些成员函数不能被继承"></a>哪些成员函数不能被继承</h1><p>构造函数、析构函数、赋值运算符重载函数</p>
+<h1 id="基类的析构函数为什么要用virtual虚析构函数"><a href="#基类的析构函数为什么要用virtual虚析构函数" class="headerlink" title="基类的析构函数为什么要用virtual虚析构函数"></a>基类的析构函数为什么要用virtual虚析构函数</h1><p>防止内存泄漏，如果基类的析构函数不是虚函数，在delete基类，调用析构函数时，只会看指针的数据类型，而不会去看赋值对象，这样就会造成内存泄漏。</p>
+<h1 id="哪些函数不能声明成虚函数"><a href="#哪些函数不能声明成虚函数" class="headerlink" title="哪些函数不能声明成虚函数"></a>哪些函数不能声明成虚函数</h1><p>非成员函数、构造函数、静态成员函数、内联成员函数、友元函数</p>
+<ol>
+<li>非成员函数</li>
+</ol>
+<p>非成员函数只能被重载(overload)，不能被继承(override)，而虚函数主要的作用是在继承中实现动态多态，非成员函数早在编译期间就已经绑定函数了，无法实现动态多态，那声明成虚函数还有什么意义呢？</p>
+<ol start="2">
+<li>构造函数</li>
+</ol>
+<p>要想调用虚函数必须要通过“虚函数表”来进行的，但虚函数表是要在对象实例化之后才能够进行调用。而在构造函数运行期间，还没有为虚函数表分配空间，自然就没法调用虚函数了。</p>
+<ol start="3">
+<li>静态成员函数</li>
+</ol>
+<p>静态成员函数对于每个类来说只有一份，所有的对象都共享这一份代码，它是属于类的而不是属于对象。虚函数必须根据对象类型才能知道调用哪一个虚函数，故虚函数是一定要在对象的基础上才可以的，两者一个是与实例相关，一个是与类相关。</p>
+<ol start="4">
+<li>内联成员函数</li>
+</ol>
+<p>内联函数是为了在代码中直接展开，减少函数调用花费的代价，虚函数是为了在继承后对象能够准确的执行自己的动作，并且inline函数在编译时被展开，虚函数在运行时才能动态地绑定函数。</p>
+<ol start="5">
+<li>友元函数</li>
+</ol>
+<p>因为C++不支持友元函数的继承，对于没有继承特性的函数没有虚函数的说法。友元函数不属于类的成员函数，不能被继承。</p>
+<h1 id="内存分配方式以及它们的区别"><a href="#内存分配方式以及它们的区别" class="headerlink" title="内存分配方式以及它们的区别"></a>内存分配方式以及它们的区别</h1><ol>
+<li>从静态存储区域分配。内存在程序编译的时候就已经分配好，这块内存在程序的整个运行期间都存在</li>
+<li>在栈上创建。在执行函数时，函数内局部变量的存储单元都可以在栈上创建，函数执行结束时这些存储单元自动被释放。</li>
+<li>从堆上分配，亦称动态内存分配。程序在运行的时候用malloc 或new 申请任意多少的内存，程序员自己负责在何时用free 或delete 释放内存。动态内存的生存期由程序员决定，使用非常灵活。</li>
+</ol>
+<h1 id="进程间通信方式和线程间通信方式"><a href="#进程间通信方式和线程间通信方式" class="headerlink" title="进程间通信方式和线程间通信方式"></a>进程间通信方式和线程间通信方式</h1><ol>
+<li>进程间通信方式</li>
+</ol>
+<ul>
+<li>管道：管道是一种半双工的通信方式，数据只能单向流动，而且只能在具有亲缘关系的进程间使用。进程的亲缘关系通常是指父子进程关系。</li>
+<li>信号量( semophore ) ： 信号量是一个计数器，可以用来控制多个进程对共享资源的访问。它常作为一种锁机制，防止某进程正在访问共享资源时，其他进程也访问该资源。因此，主要作为进程间以及同一进程内不同线程之间的同步手段。</li>
+<li>消息队列( message queue ) ： 消息队列是由消息的链表，存放在内核中并由消息队列标识符标识。消息队列克服了信号传递信息少、管道只能承载无格式字节流以及缓冲区大小受限等缺点。</li>
+<li>共享内存( shared memory ) ：共享内存就是映射一段能被其他进程所访问的内存，这段共享内存由一个进程创建，但多个进程都可以访问。共享内存是最快的 IPC 方式，它是针对其他进程间通信方式运行效率低而专门设计的。它往往与其他通信机制，如信号两，配合使用，来实现进程间的同步和通信。</li>
+<li>套接字( socket ) ： 套解口也是一种进程间通信机制，与其他通信机制不同的是，它可用于不同及其间的进程通信。</li>
+</ul>
+<ol start="2">
+<li>线程间通信方式</li>
+</ol>
+<ul>
+<li>全局变量</li>
+<li>Message消息机制</li>
+<li>CEvent对象</li>
+</ul>
+<h1 id="STL库的容器和算法"><a href="#STL库的容器和算法" class="headerlink" title="STL库的容器和算法"></a>STL库的容器和算法</h1><p>STL包括两部分：容器和算法</p>
+<p>容器即存放数据的地方，比如array，vector。分为序列式容器和关联式容器</p>
+<ul>
+<li>序列式容器：其中的元素不一定有序，但是都可以被排序比如vector,list,queue,stack，heap, priority-queue, slist</li>
+<li>关联式容器：内部结构是一个平衡二叉树，每个元素都有一个键值和一个实值，比如map, set, hashtable, hash_set</li>
+</ul>
+<p>算法有排序，复制等，以及各个容器特定的算法。</p>
+<h1 id="数组和指针的区别"><a href="#数组和指针的区别" class="headerlink" title="数组和指针的区别"></a>数组和指针的区别</h1><p>数组要么在<strong>静态存储区</strong>被创建（如全局数组），要么在<strong>栈</strong>上被创建。指针可以随时指向<strong>任意类型</strong>的内存块。</p>
+<h1 id="指针和引用的区别"><a href="#指针和引用的区别" class="headerlink" title="指针和引用的区别"></a>指针和引用的区别</h1><ol>
+<li>指针是一个新的变量，存储了另一个变量的地址，我们可以通过访问这个地址来修改另一个变量； 引用只是一个别名，还是变量本身，对引用的任何操作就是对变量本身进行操作</li>
+<li>引用只能在初始化时被赋值，指针的值可在任意时候被改变</li>
+<li>引用不能为NULL，指针可以为NULL</li>
+<li>引用必须初始化，指针不必</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/C/" rel="tag"># C++</a>
+              <a href="/tags/%E7%AC%94%E8%AE%B0%E6%95%B4%E7%90%86/" rel="tag"># 笔记整理</a>
+              <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"># 面试</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/09/hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" rel="prev" title="hexo搭建个人博客">
+                  <i class="fa fa-chevron-left"></i> hexo搭建个人博客
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/03/09/macOS%E9%85%8D%E7%BD%AEPX4%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" rel="next" title="macOS配置PX4开发环境">
+                  macOS配置PX4开发环境 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Bluzy</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
