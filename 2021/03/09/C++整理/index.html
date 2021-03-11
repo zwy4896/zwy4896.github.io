@@ -176,7 +176,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">5</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -189,7 +189,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -291,19 +291,19 @@
 <li>非成员函数</li>
 </ol>
 <p>非成员函数只能被重载(overload)，不能被继承(override)，而虚函数主要的作用是在继承中实现动态多态，非成员函数早在编译期间就已经绑定函数了，无法实现动态多态，那声明成虚函数还有什么意义呢？</p>
-<ol start="2">
+<ol>
 <li>构造函数</li>
 </ol>
 <p>要想调用虚函数必须要通过“虚函数表”来进行的，但虚函数表是要在对象实例化之后才能够进行调用。而在构造函数运行期间，还没有为虚函数表分配空间，自然就没法调用虚函数了。</p>
-<ol start="3">
+<ol>
 <li>静态成员函数</li>
 </ol>
 <p>静态成员函数对于每个类来说只有一份，所有的对象都共享这一份代码，它是属于类的而不是属于对象。虚函数必须根据对象类型才能知道调用哪一个虚函数，故虚函数是一定要在对象的基础上才可以的，两者一个是与实例相关，一个是与类相关。</p>
-<ol start="4">
+<ol>
 <li>内联成员函数</li>
 </ol>
 <p>内联函数是为了在代码中直接展开，减少函数调用花费的代价，虚函数是为了在继承后对象能够准确的执行自己的动作，并且inline函数在编译时被展开，虚函数在运行时才能动态地绑定函数。</p>
-<ol start="5">
+<ol>
 <li>友元函数</li>
 </ol>
 <p>因为C++不支持友元函数的继承，对于没有继承特性的函数没有虚函数的说法。友元函数不属于类的成员函数，不能被继承。</p>
@@ -322,7 +322,7 @@
 <li>共享内存( shared memory ) ：共享内存就是映射一段能被其他进程所访问的内存，这段共享内存由一个进程创建，但多个进程都可以访问。共享内存是最快的 IPC 方式，它是针对其他进程间通信方式运行效率低而专门设计的。它往往与其他通信机制，如信号两，配合使用，来实现进程间的同步和通信。</li>
 <li>套接字( socket ) ： 套解口也是一种进程间通信机制，与其他通信机制不同的是，它可用于不同及其间的进程通信。</li>
 </ul>
-<ol start="2">
+<ol>
 <li>线程间通信方式</li>
 </ol>
 <ul>
@@ -439,6 +439,8 @@
 
 
 
+
+  
 
 
 </body>

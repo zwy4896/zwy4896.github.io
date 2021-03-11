@@ -168,7 +168,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">5</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -181,7 +181,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -210,6 +210,115 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/11/python%E7%BB%98%E5%88%B6ROC%E6%9B%B2%E7%BA%BF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Bluzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Bluzy的小站">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/03/11/python%E7%BB%98%E5%88%B6ROC%E6%9B%B2%E7%BA%BF/" class="post-title-link" itemprop="url">python绘制ROC曲线</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-03-11 13:56:36 / 修改时间：13:58:02" itemprop="dateCreated datePublished" datetime="2021-03-11T13:56:36+08:00">2021-03-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="什么是ROC曲线"><a href="#什么是ROC曲线" class="headerlink" title="什么是ROC曲线"></a>什么是ROC曲线</h1><p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Receiver_operating_characteristic">ROC是<strong>R</strong>eceiver <strong>O</strong>perating <strong>C</strong>haracteristic的缩写，用于反映二元分类器系统随着其判别阈值的变化而具有的诊断能力</a>。说白了就是一条折线，横轴是FPR，纵轴是TPR。</p>
+<h1 id="FPR-TPR计算"><a href="#FPR-TPR计算" class="headerlink" title="FPR TPR计算"></a>FPR TPR计算</h1><p>二分类问题中，一类是positive，另一类是negative。分类模型的预测结果被阈值化后，判定为TP，FP，TN，FN四种情况：</p>
+<ul>
+<li>if <em>pred</em> ≥ <em>thresh</em> and <em>gt</em> == Positive: TP ++</li>
+<li>if <em>pred</em> ≥ <em>thresh</em> and <em>gt</em> == Negative: FP ++</li>
+<li>if <em>pred</em> &lt; <em>thresh</em> and <em>gt</em> == Positive: FN ++</li>
+<li>if <em>pred</em> &lt; <em>thresh</em> and <em>gt</em> == Negative: TN ++</li>
+</ul>
+<p>这写TP、FP的该怎么记忆呢？我是这么记忆的：首先看<em>pred</em>与<em>thresh</em>的关系，如果<em>pred</em>≥<em>thresh</em>，一律都是P；再看<em>gt</em>的值，<em>Positive</em>为T，否则为F，同时注意P和N都要写在后面。这样是不是很好记忆了呢？</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>dt\gt</th>
+<th>Positive</th>
+<th>Negative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Positive</td>
+<td>TP</td>
+<td>FP</td>
+</tr>
+<tr>
+<td>Negative</td>
+<td>FN</td>
+<td>TN</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h1 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h1><p>俗话说：<em>Talk is cheap, show me the code!</em>，不多逼逼，直接上代码！</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">gt = [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>]</span><br><span class="line">pred = [<span class="number">0.3</span>, <span class="number">0.2</span>, <span class="number">0.7</span>, <span class="number">0.5</span>, <span class="number">0.4</span>, <span class="number">0.9</span>, <span class="number">0.6</span>]</span><br><span class="line">TPR = []</span><br><span class="line">FPR = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> thres <span class="keyword">in</span> pred:</span><br><span class="line">    TP = FP = TN = FN = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> i, p <span class="keyword">in</span> <span class="built_in">enumerate</span>(pred):</span><br><span class="line">        <span class="keyword">if</span> pred[i] &gt;= thres <span class="keyword">and</span> gt[i] == <span class="number">1</span>:</span><br><span class="line">            TP += <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> pred[i] &gt;= thres <span class="keyword">and</span> gt[i] == <span class="number">0</span>:</span><br><span class="line">            FP += <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> pred[i] &lt; thres <span class="keyword">and</span> gt[i] == <span class="number">1</span>:</span><br><span class="line">            FN += <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> pred[i] &lt; thres <span class="keyword">and</span> gt[i] == <span class="number">0</span>:</span><br><span class="line">            TN += <span class="number">1</span></span><br><span class="line">    TPR.append(TP / (TP + FN))</span><br><span class="line">    FPR.append(FP / (FP + TN))</span><br><span class="line">zipped = <span class="built_in">zip</span>(FPR, TPR)</span><br><span class="line">sort_zipped = <span class="built_in">sorted</span>(zipped, key=<span class="keyword">lambda</span> x: x[<span class="number">0</span>])</span><br><span class="line">result = <span class="built_in">zip</span>(*sort_zipped)</span><br><span class="line">FPR, TPR = [<span class="built_in">list</span>(x) <span class="keyword">for</span> x <span class="keyword">in</span> result]</span><br><span class="line">plt.plot(FPR, TPR)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/03/11/python%E7%BB%98%E5%88%B6ROC%E6%9B%B2%E7%BA%BF/Figure_1.png" alt="Figure_1"></p>
+<p>以上便是ROC曲线以及python实现的具体操作，你学废了吗？</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -276,21 +385,18 @@
 <p>$NCReLU=concat(ReLU(x),-ReLU(-x))$</p>
 <p>用途不仅在输出中将输入大于0的部分保留下来，也将小于0的部分一并保留，并且按照输出通道维度进行拼接。pytorch自带方法实现：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">torch.cat([F.relu(x), -F.relu(-x)], dim=<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
-
-<p>要实现以上算子，需要实现<em><strong>setup.py</strong></em>和<em><strong>ncrelu.cpp</strong></em>两个文件即可。</p>
+<p>要实现以上算子，需要实现<strong><em>setup.py</em></strong>和<strong><em>ncrelu.cpp</em></strong>两个文件即可。</p>
 <ol>
 <li>setup.py</li>
 </ol>
 <p>利用python中提供的setuptools模块完成事先编译流程，将写有算子的C++文件编译成为一个动态链接库(Linux下是.so文件)，可以让python调用其中实现的函数功能。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup</span><br><span class="line"><span class="keyword">from</span> torch.utils <span class="keyword">import</span> cpp_extension</span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">    name=<span class="string">&#x27;ncrelu_cpp&#x27;</span>,				<span class="comment"># 编译后的链接库名称</span></span><br><span class="line">    ext_modules=[</span><br><span class="line">        cpp_extension.CppExtension(<span class="string">&#x27;ncrelu_cpp&#x27;</span>,[<span class="string">&#x27;ncrelu.cpp&#x27;</span>]						<span class="comment"># 待编译文件，及编译函数</span></span><br><span class="line">        )</span><br><span class="line">    ],</span><br><span class="line">    cmdclass=&#123;						<span class="comment"># 执行编译命令设置</span></span><br><span class="line">        <span class="string">&#x27;build_ext&#x27;</span>: cpp_extension.BuildExtension</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
 <p>这里，pytorch提供了一个封装cpp_extension，方便编译过程中所需要的设置选项以及所需包含的头文件位置路径设置等。</p>
-<ol start="2">
+<ol>
 <li>ncrelu.cpp</li>
 </ol>
 <p>用C++实现算子。</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;torch/extension.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function">torch::Tensor <span class="title">ncrelu_forward</span><span class="params">(torch::Tensor input)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> pos = input.clamp_min(<span class="number">0</span>);	        <span class="comment">// 具体实现部分</span></span><br><span class="line">    <span class="keyword">auto</span> neg = input.clamp_max(<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> torch::cat(&#123;pos, neg&#125;, <span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) &#123;	<span class="comment">// 绑定部分</span></span><br><span class="line">    m.def(<span class="string">&quot;forward&quot;</span>, &amp;ncrelu_forward, <span class="string">&quot;NCReLU forward&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>以上代码包含三个部分：</p>
 <p><strong>头文件：</strong>包含了<code>torch/extension.h</code>头文件，是编写pytorch的C++扩展时必须包含的一个文件。基本上囊括了实现中所需要的所有依赖，包含了<strong>ATen</strong>，<strong>pybind11</strong>和二者之间的交互。其中，ATen是pytorch底层张量运算库，负责实现具体张量操作运算。pybind11是实现C++代码到python的绑定，可以在python中调用C++函数。</p>
 <p><strong>具体实现：</strong>函数返回类型和传递参数类型均是<code>torch::Tensor</code>类，这种对象不仅包含了数据，还附属了诸多运算操作。因此我们可以看到在下面实现方式类似于python中使用Pytorch张量运算操作一样，<strong>可以直接调用如截取操作clamp和拼接操作cat等</strong>，非常简洁易读且方便。</p>
@@ -362,19 +468,12 @@
     
     <div class="post-body" itemprop="articleBody">
           <h1 id="1-安装Homebrew"><a href="#1-安装Homebrew" class="headerlink" title="1. 安装Homebrew"></a>1. 安装Homebrew</h1><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/bin/bash -c <span class="string">&quot;<span class="subst">$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)</span>&quot;</span></span><br></pre></td></tr></table></figure>
-
 <h1 id="2-允许打开更多文件"><a href="#2-允许打开更多文件" class="headerlink" title="2. 允许打开更多文件"></a>2. 允许打开更多文件</h1><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim ~/.zshenv</span><br></pre></td></tr></table></figure>
-
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ulinit -S -n 2048</span><br></pre></td></tr></table></figure>
-
 <h1 id="3-python版本"><a href="#3-python版本" class="headerlink" title="3. python版本"></a>3. python版本</h1><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">alias</span> pip3=/usr/bin/pip3</span><br></pre></td></tr></table></figure>
-
 <h1 id="4-安装工具"><a href="#4-安装工具" class="headerlink" title="4. 安装工具"></a>4. 安装工具</h1><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew tap PX4/px4</span><br></pre></td></tr></table></figure>
-
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Brew install px4-dev</span><br></pre></td></tr></table></figure>
-
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 -m pip install --user pyserial empy toml numpy pandas jinja2 pyyaml pyros-genmsg packaging</span><br></pre></td></tr></table></figure>
-
 <h1 id="5-Gazebo仿真"><a href="#5-Gazebo仿真" class="headerlink" title="5. Gazebo仿真"></a>5. Gazebo仿真</h1>
       
     </div>
@@ -464,19 +563,19 @@
 <li>非成员函数</li>
 </ol>
 <p>非成员函数只能被重载(overload)，不能被继承(override)，而虚函数主要的作用是在继承中实现动态多态，非成员函数早在编译期间就已经绑定函数了，无法实现动态多态，那声明成虚函数还有什么意义呢？</p>
-<ol start="2">
+<ol>
 <li>构造函数</li>
 </ol>
 <p>要想调用虚函数必须要通过“虚函数表”来进行的，但虚函数表是要在对象实例化之后才能够进行调用。而在构造函数运行期间，还没有为虚函数表分配空间，自然就没法调用虚函数了。</p>
-<ol start="3">
+<ol>
 <li>静态成员函数</li>
 </ol>
 <p>静态成员函数对于每个类来说只有一份，所有的对象都共享这一份代码，它是属于类的而不是属于对象。虚函数必须根据对象类型才能知道调用哪一个虚函数，故虚函数是一定要在对象的基础上才可以的，两者一个是与实例相关，一个是与类相关。</p>
-<ol start="4">
+<ol>
 <li>内联成员函数</li>
 </ol>
 <p>内联函数是为了在代码中直接展开，减少函数调用花费的代价，虚函数是为了在继承后对象能够准确的执行自己的动作，并且inline函数在编译时被展开，虚函数在运行时才能动态地绑定函数。</p>
-<ol start="5">
+<ol>
 <li>友元函数</li>
 </ol>
 <p>因为C++不支持友元函数的继承，对于没有继承特性的函数没有虚函数的说法。友元函数不属于类的成员函数，不能被继承。</p>
@@ -495,7 +594,7 @@
 <li>共享内存( shared memory ) ：共享内存就是映射一段能被其他进程所访问的内存，这段共享内存由一个进程创建，但多个进程都可以访问。共享内存是最快的 IPC 方式，它是针对其他进程间通信方式运行效率低而专门设计的。它往往与其他通信机制，如信号两，配合使用，来实现进程间的同步和通信。</li>
 <li>套接字( socket ) ： 套解口也是一种进程间通信机制，与其他通信机制不同的是，它可用于不同及其间的进程通信。</li>
 </ul>
-<ol start="2">
+<ol>
 <li>线程间通信方式</li>
 </ol>
 <ul>
@@ -582,28 +681,24 @@
     
     <div class="post-body" itemprop="articleBody">
           <h1 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h1><ol>
-<li><a href="#%E5%AE%89%E8%A3%85node.js">安装node.js</a></li>
+<li><a href="#安装node.js">安装node.js</a></li>
 <li>git</li>
-<li><a href="#%E5%AE%89%E8%A3%85hexo">安装hexo</a></li>
+<li><a href="#安装hexo">安装hexo</a></li>
 </ol>
 <h2 id="安装node-js"><a href="#安装node-js" class="headerlink" title="安装node.js"></a>安装node.js</h2><p><a target="_blank" rel="noopener" href="https://nodejs.org/en/">Node.js官网下载</a></p>
 <h2 id="安装hexo"><a href="#安装hexo" class="headerlink" title="安装hexo"></a>安装hexo</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo npm isntall -g hexo</span><br></pre></td></tr></table></figure>
-
 <h1 id="创建静态博客"><a href="#创建静态博客" class="headerlink" title="创建静态博客"></a>创建静态博客</h1><ol>
 <li>新建blog文件夹并初始化</li>
 </ol>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir blog &amp;&amp; <span class="built_in">cd</span> blog</span><br><span class="line">hexo init</span><br></pre></td></tr></table></figure>
-
 <p>可能会遇到init过程缓慢，可通过切换npm默认源至淘宝源解决：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm --registry https://registry.npm.taobao.org info underscore</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
+<ol>
 <li>启用本地服务</li>
 </ol>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo s</span><br></pre></td></tr></table></figure>
-
 <p><img src="/2021/03/09/hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image-20210309184655111.png" alt="image-20210309184655111"></p>
-<p>在浏览器地址栏输入<em><strong>localhost:4000</strong></em>即可看到效果</p>
+<p>在浏览器地址栏输入<strong><em>localhost:4000</em></strong>即可看到效果</p>
 <p><img src="/2021/03/09/hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image-20210309185131979.png" alt="image-20210309185131979"></p>
 <p>使用以下命令新建博客、上传博客</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo new NEW_BLOG</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure>
@@ -683,6 +778,8 @@
 
 
 
+
+  
 
 
 </body>

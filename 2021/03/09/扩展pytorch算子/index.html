@@ -23,12 +23,12 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Pisces","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
-<meta name="description" content="扩展pytorch：实现自定义算子（一）例： $NCReLU&#x3D;concat(ReLU(x),-ReLU(-x))$ 用途不仅在输出中将输入大于0的部分保留下来，也将小于0的部分一并保留，并且按照输出通道维度进行拼接。pytorch自带方法实现： 1torch.cat([F.relu(x), -F.relu(-x)], dim&#x3D;1)  要实现以上算子，需要实现setup.py和ncrelu.cpp两">
+<meta name="description" content="扩展pytorch：实现自定义算子（一）例： $NCReLU&#x3D;concat(ReLU(x),-ReLU(-x))$ 用途不仅在输出中将输入大于0的部分保留下来，也将小于0的部分一并保留，并且按照输出通道维度进行拼接。pytorch自带方法实现： 1torch.cat([F.relu(x), -F.relu(-x)], dim&#x3D;1) 要实现以上算子，需要实现setup.py和ncrelu.cpp两个">
 <meta property="og:type" content="article">
 <meta property="og:title" content="扩展pytorch算子">
 <meta property="og:url" content="http://example.com/2021/03/09/%E6%89%A9%E5%B1%95pytorch%E7%AE%97%E5%AD%90/index.html">
 <meta property="og:site_name" content="Bluzy的小站">
-<meta property="og:description" content="扩展pytorch：实现自定义算子（一）例： $NCReLU&#x3D;concat(ReLU(x),-ReLU(-x))$ 用途不仅在输出中将输入大于0的部分保留下来，也将小于0的部分一并保留，并且按照输出通道维度进行拼接。pytorch自带方法实现： 1torch.cat([F.relu(x), -F.relu(-x)], dim&#x3D;1)  要实现以上算子，需要实现setup.py和ncrelu.cpp两">
+<meta property="og:description" content="扩展pytorch：实现自定义算子（一）例： $NCReLU&#x3D;concat(ReLU(x),-ReLU(-x))$ 用途不仅在输出中将输入大于0的部分保留下来，也将小于0的部分一并保留，并且按照输出通道维度进行拼接。pytorch自带方法实现： 1torch.cat([F.relu(x), -F.relu(-x)], dim&#x3D;1) 要实现以上算子，需要实现setup.py和ncrelu.cpp两个">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-03-09T14:02:42.000Z">
 <meta property="article:modified_time" content="2021-03-10T13:17:23.844Z">
@@ -175,7 +175,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">5</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -188,7 +188,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -284,21 +284,18 @@
 <p>$NCReLU=concat(ReLU(x),-ReLU(-x))$</p>
 <p>用途不仅在输出中将输入大于0的部分保留下来，也将小于0的部分一并保留，并且按照输出通道维度进行拼接。pytorch自带方法实现：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">torch.cat([F.relu(x), -F.relu(-x)], dim=<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
-
-<p>要实现以上算子，需要实现<em><strong>setup.py</strong></em>和<em><strong>ncrelu.cpp</strong></em>两个文件即可。</p>
+<p>要实现以上算子，需要实现<strong><em>setup.py</em></strong>和<strong><em>ncrelu.cpp</em></strong>两个文件即可。</p>
 <ol>
 <li>setup.py</li>
 </ol>
 <p>利用python中提供的setuptools模块完成事先编译流程，将写有算子的C++文件编译成为一个动态链接库(Linux下是.so文件)，可以让python调用其中实现的函数功能。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup</span><br><span class="line"><span class="keyword">from</span> torch.utils <span class="keyword">import</span> cpp_extension</span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">    name=<span class="string">&#x27;ncrelu_cpp&#x27;</span>,				<span class="comment"># 编译后的链接库名称</span></span><br><span class="line">    ext_modules=[</span><br><span class="line">        cpp_extension.CppExtension(<span class="string">&#x27;ncrelu_cpp&#x27;</span>,[<span class="string">&#x27;ncrelu.cpp&#x27;</span>]						<span class="comment"># 待编译文件，及编译函数</span></span><br><span class="line">        )</span><br><span class="line">    ],</span><br><span class="line">    cmdclass=&#123;						<span class="comment"># 执行编译命令设置</span></span><br><span class="line">        <span class="string">&#x27;build_ext&#x27;</span>: cpp_extension.BuildExtension</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
 <p>这里，pytorch提供了一个封装cpp_extension，方便编译过程中所需要的设置选项以及所需包含的头文件位置路径设置等。</p>
-<ol start="2">
+<ol>
 <li>ncrelu.cpp</li>
 </ol>
 <p>用C++实现算子。</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;torch/extension.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function">torch::Tensor <span class="title">ncrelu_forward</span><span class="params">(torch::Tensor input)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> pos = input.clamp_min(<span class="number">0</span>);	        <span class="comment">// 具体实现部分</span></span><br><span class="line">    <span class="keyword">auto</span> neg = input.clamp_max(<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> torch::cat(&#123;pos, neg&#125;, <span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) &#123;	<span class="comment">// 绑定部分</span></span><br><span class="line">    m.def(<span class="string">&quot;forward&quot;</span>, &amp;ncrelu_forward, <span class="string">&quot;NCReLU forward&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>以上代码包含三个部分：</p>
 <p><strong>头文件：</strong>包含了<code>torch/extension.h</code>头文件，是编写pytorch的C++扩展时必须包含的一个文件。基本上囊括了实现中所需要的所有依赖，包含了<strong>ATen</strong>，<strong>pybind11</strong>和二者之间的交互。其中，ATen是pytorch底层张量运算库，负责实现具体张量操作运算。pybind11是实现C++代码到python的绑定，可以在python中调用C++函数。</p>
 <p><strong>具体实现：</strong>函数返回类型和传递参数类型均是<code>torch::Tensor</code>类，这种对象不仅包含了数据，还附属了诸多运算操作。因此我们可以看到在下面实现方式类似于python中使用Pytorch张量运算操作一样，<strong>可以直接调用如截取操作clamp和拼接操作cat等</strong>，非常简洁易读且方便。</p>
@@ -327,6 +324,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2021/03/11/python%E7%BB%98%E5%88%B6ROC%E6%9B%B2%E7%BA%BF/" rel="next" title="python绘制ROC曲线">
+                  python绘制ROC曲线 <i class="fa fa-chevron-right"></i>
+                </a>
             </div>
           </div>
     </footer>
@@ -396,6 +396,8 @@
 
 
 
+
+  
 
 
 </body>
